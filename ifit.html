@@ -1,0 +1,263 @@
+<html>
+  <!--    i-Fit Tone Generator    -->
+  <!--  By Michael K. Pellegrino  -->
+  <!--      January 19, 2022      -->
+  
+  <head>
+    <title>iFit Tone Generator - Michael K. Pellegrino</title>
+    <script src="wav.js"></script>
+    <script language="javascript">
+
+      /* Uses: wav.js that is Copyright (c) 2015 Kevin Phillips */
+      /* It's available here:  http://kmp1.github.io/wav.js     */
+      var wave=0;
+      var pointer=0;
+
+      function encodeDigit( x )
+      {
+	  var str="";
+	  
+	  for( var i=0; i<8; i++ )
+	  {
+	      if( x % 2 == 0  )
+	      {
+		  str += "0";
+	      }
+	      else
+	      {
+		  str += "1";
+	      }
+	      x = Math.floor(x/2);
+
+	  }
+	  str = "01" + str;
+	  return str;
+      }
+      
+      function encode( x, y )
+      {
+	  var chtxt=encodeDigit( x+y );
+
+	  var ytxt=encodeDigit( y );
+
+	  var xtxt=encodeDigit( x );	  
+
+	  return ( xtxt + ytxt + chtxt );
+      }
+
+      function createTones( x, y )
+      {
+	  var str = encode( x, y );
+	  for( var j=0; j<2; j++ )
+	  {
+	      for( var i=0; i<str.length; i++ )
+	      {
+		  if( str[i] == "0" ) silence88();
+		  if( str[i] == "1" ) chirp();
+	      }
+	      for( var i=0; i<18; i++ )
+	      {
+		  silence88();
+	      }
+	      silenceSamples(3);
+
+	  }
+	  /* approx 405*88 */
+	  /* this is the space between tones in the sample file */
+	  /*silenceSamples( 35646 );*/
+      }
+
+      function intro_beeps()
+      {
+	  silence( 2 );
+	  createTones( 20, 20 );
+	  silence( 3 );
+	  for( var i=0; i<2; i++ )
+	  {
+	      createTones( 10, 10 );
+	      silenceSamples( 26460 );
+	      createTones( 20, 20 );
+	      silenceSamples( 26460 );
+	  }
+	  pointer=0;
+      }
+
+      function chirp()
+      {
+	  for( var i=0; i<4; i++ )
+	  {
+	      for( var j=0; j<22; j+=1)
+	      {
+		  pointer++;
+		  wave.addSampleToAllChannels( Math.sin( Math.PI*j/11 )*255/2 + 127 );
+	      }
+	  }
+      }
+
+      function silence88()
+      {
+	  for( var i = 0; i < 88; i++ )
+	  {
+	      pointer++;
+	      wave.addSampleToAllChannels(127);
+	  }
+      }
+      
+      function silenceSamples( t )
+      {
+	  for( var i = 0; i < t; i++ )
+	  {
+	      pointer++;
+	      wave.addSampleToAllChannels(127);
+	  }
+      }
+      function silence( t )
+      {
+	  var l = t*44100;
+	  for( var i = 0; i < l; i++ )
+	  {
+	      pointer++;
+	      wave.addSampleToAllChannels(127);
+	  }
+      }
+
+      function onload()
+      {
+	  wave = wav.create(2, 44100, wav.SampleSize.EIGHT);
+	  pointer=0;
+	  return;
+      }
+
+      function saveByteArray()
+      {
+	  processTextArea();
+	  res = wave.toByteArray();
+	  let byte = new Uint8Array(res);
+	  
+	  var blob = new Blob([byte], {type: "application/wav"});
+	  var link = document.createElement('a');
+	  link.href = window.URL.createObjectURL(blob);
+	  
+	  var fileName = form1.fn.value;
+	  if( fileName == "" )
+	  {
+	      fileName="no_name.wav";
+	  }
+
+	  if( fileName.slice(-4) != ".wav" && fileName.slice(-4) != ".WAV" )
+	  {
+	      fileName+=".wav";
+	  }
+	  form1.fn.value = fileName;
+	  link.download = fileName;
+	  link.click();
+      };
+
+      function processTextArea()
+      {
+
+	  intro_beeps();
+	  var txt = form1.text_area.value;
+	  var line = txt.split("\n");
+	  for( var i=0; i<line.length; i++ )
+	  {
+	      if( line[i] == '\n' || line[i] == "" )
+	      {
+		  document.getElementById("errorlog").innerHTML += "[EMPTY LINE]<br>";
+	      }
+	      else
+	      {
+		  var parameter = line[i].split(" ");
+		  if( pointer <= Number(parameter[0]))
+		  {
+		      silenceSamples( Number(parameter[0] - pointer) );
+		      document.getElementById("errorlog").innerHTML += "[CREATE] " + parameter[0] + ":" + parameter[1] + " pointer: " + pointer + "<br>";
+		      createTones( Number(parameter[1]), Number(parameter[1]) );
+		  }
+		  else
+		  {
+		      document.getElementById("errorlog").innerHTML += "[ERROR] " + parameter[0] + ":" + parameter[1] + " pointer: " + pointer + "<br>";
+		  }
+	      }
+
+	  }
+
+
+      }
+      function sortTextArea()
+      {
+	  var txt = form1.text_area.value;
+	  var line = txt.split("\n");
+	  form1.text_area.value="";
+	  line.sort(comp);
+	  for( var i=0; i<line.length; i++ )
+	  {
+	      if( line[i] == "" || line[i] == '\n' )
+	      {
+		  document.getElementById("errorlog").innerHTML += "[EMPTY LINE during SORT]<br>";
+	      }
+	      else
+	      {
+		  form1.text_area.value += line[i] + '\n';
+	      }
+	  }
+      }
+
+      function comp(a, b)
+      {
+	  var v1 = Number(a.split(' ')[0]);
+	  var v2 = Number(b.split(' ')[0]);
+	  
+	  if (v1<v2)
+	  {
+	      return -1;
+	  }
+	  if (v1>v2)
+	  {
+	      return 1;
+	  }
+	  return 0;
+      }
+
+      function addToWorkout()
+      {
+	  var location = Number(form1.textMinutes.value*60*44100) + Number(form1.textSeconds.value*44100);
+
+	  var resistance = Math.floor(Number(form1.textResist.value));
+	  if( resistance == 0 ) resistance = 10;
+	  if( resistance < 10 ) resistance*=10;
+	  form1.text_area.value += "" + location + " " + resistance + "\n";
+	  sortTextArea();
+      }
+
+    </script>
+  </head>
+  <body onload="onload();">
+      
+      <p><center><font size=+3>iFit Tone Generator</font></center></p>
+      <p><center>By: <a target=_blank href="http://mkpelleg.freeshell.org">Michael K. Pellegrino</a></center></p>
+      <p><center>Version 1.0 - 2022 01 19</center></p>
+      <p>This program will help you create an iFit workout audio track to coincide with a music playlist.</p>
+      <p>The program uses <a target=_blank href="http://kmp1.github.io/wav.js/">wav.js</a> by Kevin Phillips.</p>
+      <p><b>Directions</b>:</p>
+      <ol>
+	<li>Enter a time (minutes and seconds) and a resistance (10 - 100 in increments of 10) for your workout soundtrack.</li>
+	<li>Click &#34;Add to Workout&#34;</li>
+	<li>Enter a filename for your <i>wav</i> file.</li>
+	<li>Click &#34;Download WAV file&#34; to get the audio file.</li>
+	<li>Then burn it to a CD.</li>
+      </ol>
+
+      <center>
+	    
+      <form name='form1' action='' method='GET'>
+	<p>Filename: <input type='fn' id='fn' name='fn' size=10><input type='button' onclick='javascript:saveByteArray();' value='Download WAV file'><br>
+	
+	<p>m:<input type='text' id='textMinutes' name='textMinutes' size=2>&nbsp;s:<input type='text' id='textSeconds' name='textSeconds' size=2> &nbsp;resistance:<input type='text' id='textResist' name='textResist' size=5><input type='button' onclick='javascript:addToWorkout();' value='Add to Workout'></p>
+	<p><textarea cols=80 rows=20 name='text_area'></textarea></p>
+	<p id="errorlog"></p>
+
+</form>
+</center>
+</html>
+
