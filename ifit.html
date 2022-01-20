@@ -123,13 +123,16 @@
 
       function onload()
       {
-	  wave = wav.create(2, 44100, wav.SampleSize.EIGHT);
-	  pointer=0;
+	  /*wave = wav.create(2, 44100, wav.SampleSize.EIGHT);
+	  pointer=0;*/
 	  return;
       }
 
       function saveByteArray()
       {
+	  wave = wav.create(2, 44100, wav.SampleSize.EIGHT);
+	  pointer=0;
+
 	  processTextArea();
 	  res = wave.toByteArray();
 	  let byte = new Uint8Array(res);
@@ -156,7 +159,7 @@
       function processTextArea()
       {
 
-	  intro_beeps();
+	  if( form1.leadin.value == "yes" ) intro_beeps();
 	  var txt = form1.text_area.value;
 	  var line = txt.split("\n");
 	  for( var i=0; i<line.length; i++ )
@@ -236,7 +239,7 @@
       
       <p><center><font size=+3>iFit Tone Generator</font></center></p>
       <p><center>By: <a target=_blank href="http://mkpelleg.freeshell.org">Michael K. Pellegrino</a></center></p>
-      <p><center>Version 1.0 - 2022 01 19</center></p>
+      <p><center>Version 1.01 - 2022 01 20</center></p>
       <p>This program will help you create an iFit workout audio track to coincide with a music playlist.</p>
       <p>The program uses <a target=_blank href="http://kmp1.github.io/wav.js/">wav.js</a> by Kevin Phillips.</p>
       <p><b>Directions</b>:</p>
@@ -251,7 +254,7 @@
       <center>
 	    
       <form name='form1' action='' method='GET'>
-	<p>Filename: <input type='fn' id='fn' name='fn' size=10><input type='button' onclick='javascript:saveByteArray();' value='Download WAV file'><br>
+	<p>Filename: <input type='fn' id='fn' name='fn' size=10><input type='button' onclick='javascript:saveByteArray();' value='Download WAV file'>&nbsp;Include Lead-in: <input type="checkbox" id="leadin" name="leadin" value="yes" checked><br>
 	
 	<p>m:<input type='text' id='textMinutes' name='textMinutes' size=2>&nbsp;s:<input type='text' id='textSeconds' name='textSeconds' size=2> &nbsp;resistance:<input type='text' id='textResist' name='textResist' size=5><input type='button' onclick='javascript:addToWorkout();' value='Add to Workout'></p>
 	<p><textarea cols=80 rows=20 name='text_area'></textarea></p>
