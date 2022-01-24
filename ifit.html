@@ -1,7 +1,7 @@
 <html>
   <!--    i-Fit Tone Generator    -->
   <!--  By Michael K. Pellegrino  -->
-  <!--      January 23, 2022      -->
+  <!--      January 24, 2022      -->
   
   <head>
     <title>iFit Tone Generator - Michael K. Pellegrino</title>
@@ -17,6 +17,7 @@
       var ht=0;
       var scale=119070;
       var startattime=0;
+      var messages_level=3; /* 0: none, 1: Errors, 2: Errors and Warnings, 3: All Messages */
       
       function encodeDigit( x )
       {
@@ -75,8 +76,7 @@
 
       function intro_beeps()
       {
-	  
-	  silence( Number( form1.leadin.value ) );
+	  /* silence( Number( form1.leadin.value ) );
 	  createTones( 20, 20 );
 	  silence( 3 );
 	  for( var i=0; i<2; i++ )
@@ -87,8 +87,7 @@
 	      silenceSamples( 26460 );
 	  }
 
-	  /* reset the sample pointer after adding all of those chircps! */
-	  pointer=0;
+	  pointer=0; */
 
       }
 
@@ -148,29 +147,53 @@
 	  
       }
 
+      function resetAll()
+      {
+
+	  document.getElementById("pleasewait").style.visibility = "hidden";
+	  pointer=0;
+	  ht=0;
+	  form1.text_area.value="";
+	  form1.fn.value="no_name.wav";
+	  form1.startatmin.value="0";
+	  form1.startatsec.value="0";
+	  form1.textResist.value="60";
+	  form1.textMinutes.value="0";
+	  form1.textSeconds.value="0";
+	  svg_array[0]=" ";
+	  document.getElementById("errorlog").innerHTML = "";
+      }
       function onload()
       {
-	  svg_array[0]=" ";
-	  ht=0;
-	  addObject("<svg width='1000' height='110' viewBox='0 0 1000 110'>");
+	  resetAll();
+
+	  addObject("<svg width='1000' height='111' viewBox='0 0 1000 111'>");
 
 	  /* The Frame around the View */
-	  addObject("<line  x1='0' y1='110' x2='1000' y2='110' stroke-width='2' stroke='#000000'/>");
-	  addObject("<line  x1='222' y1='110' x2='222' y2='100' stroke-width='2' stroke='#000000'/>");
-	  addObject("<line  x1='444' y1='110' x2='444' y2='100' stroke-width='2' stroke='#000000'/>");
-	  addObject("<line  x1='666' y1='110' x2='666' y2='100' stroke-width='2' stroke='#000000'/>");
-	  addObject("<line  x1='888' y1='110' x2='888' y2='100' stroke-width='2' stroke='#000000'/>");
-	  addObject("<line  x1='1000' y1='110' x2='1000' y2='100' stroke-width='2' stroke='#000000'/>");
-	  addObject("<line  x1='0' y1='110' x2='0' y2='100' stroke-width='2' stroke='#000000'/>");
+	  for( var i=111; i<=1000; i+=111 )
+	  {
+	      addObject("<line x1='" + i + "' y1='110' x2='" + i + "' y2='105' stroke-width='2' stroke='#000000'/>");
+	  }
+
+	  addObject("<line x1='0' y1='110' x2='0' y2='0' stroke-width='2' stroke='#000000'/>");
+	  
+	  for( var i=100; i>=0; i-=10 )
+	  {
+	      addObject("<line x1='0' y1='" + i + "' x2='1000' y2='" + i + "' stroke-witdth='2' stroke='#AAAAAA'/>");
+	  }
+	  addObject("<line x1='0' y1='110' x2='1000' y2='110' stroke-width='2' stroke='#000000'/>");
+
 	  return;
 
       }
 
       function saveByteArray()
       {
+	  /* ***** */
+	  document.getElementById("pleasewait").style.visibility = "visible";
+	  //alert();
 	  wave = wav.create(2, 44100, wav.SampleSize.EIGHT);
 	  pointer=0;
-
 	  processTextArea();
 	  res = wave.toByteArray();
 	  let byte = new Uint8Array(res);
@@ -192,16 +215,27 @@
 	  form1.fn.value = fileName;
 	  link.download = fileName;
 	  link.click();
-      };
+	  document.getElementById("pleasewait").style.visibility = "hidden";
 
-      function logMsg( text )
+      }
+
+      function logMsg( text, type)
       {
-	  //document.getElementById("errorlog").innerHTML += text + "<br>";
+	  if( type == 0 ) type = 3;
+	  if( type > messages_level ) return;
+	  /* 0: none, 1: Errors, 3: Errors and Warnings, 2: All Messages */
+	  if( type == 2 ) document.getElementById("errorlog").innerHTML += "<font color='#00FF00'>" + text + "</font><br>"; // no error
+	  if( type == 1 ) document.getElementById("errorlog").innerHTML += "<font color='#FF0000'>" + text + "</font><br>"; // error
+	  if( type == 3 ) document.getElementById("errorlog").innerHTML += "<font color='#CCCC00'>" + text + "</font><br>"; // warning
       }
       function processTextArea()
       {
-
-	  if( form1.leadin.value == "yes" )
+	  //form1.startatmin.setAttribute("disabled", "disabled");
+	  //form1.startatsec.setAttribute("disabled", "disabled");
+	  startattime=Number(form1.startatmin.value*60*44100) + Number(form1.startatsec.value*44100);
+	  pointer=startattime;
+	  
+	 /* if( form1.leadin.value == "yes" )
 	  {
 	      if( form1.leadintime.value == "" )
 	      {
@@ -210,14 +244,14 @@
 	      }
 	      
 	      intro_beeps();
-	  }
+	  } */
 	  var txt = form1.text_area.value;
 	  var line = txt.split("\n");
 	  for( var i=0; i<line.length; i++ )
 	  {
 	      if( line[i] == '\n' || line[i] == "" )
 	      {
-		  document.getElementById("errorlog").innerHTML += "[EMPTY LINE]<br>";
+		  logMsg("[EMPTY LINE]",2);
 	      }
 	      else
 	      {
@@ -225,12 +259,12 @@
 		  if( pointer <= Number(parameter[0]))
 		  {
 		      silenceSamples( Number(parameter[0] - pointer) );
-		      logMsg( "[CREATE] " + parameter[0] + ":" + parameter[1] + " pointer: " + pointer );
+		      logMsg( "[CREATE] " + parameter[0] + ":" + parameter[1] + " sample #: " + pointer, 3 );
 		      createTones( Number(parameter[1]), Number(parameter[1]) );
 		  }
 		  else
 		  {
-		      logMsg( "[ERROR] " + parameter[0] + ":" + parameter[1] + " pointer: " + pointer  );
+		      logMsg( "[ERROR] " + parameter[0] + ":" + parameter[1] + " sample #: " + pointer, 1);
 		  }
 	      }
 
@@ -249,7 +283,7 @@
 	      if( line[i] == "" || line[i] == '\n' )
 	      {
 		  
-		  logMsg("[WARNING] EMPTY LINE during SORT");
+		  logMsg("[WARNING] EMPTY LINE during SORT", 2);
 	      }
 	      else
 	      {
@@ -277,10 +311,9 @@
       function addToWorkout()
       {
 	  var location = Number(form1.textMinutes.value*60*44100) + Number(form1.textSeconds.value*44100);
-
+	  /* ***** */
 	  /* grey out (lock) the start at time options */
-	  form1.startatmin.setAttribute("disabled", "disabled");
-	  form1.startatsec.setAttribute("disabled", "disabled");
+	  /* form1.startatsec.setAttribute("disabled", "disabled"); */
 	  startattime=Number(form1.startatmin.value*60*44100) + Number(form1.startatsec.value*44100);
 
 	  var resistance = Math.floor(Number(form1.textResist.value));
@@ -295,6 +328,7 @@
 
       function check()
       {
+	  /*
 	  if(form1.leadin.checked == true)
 	  {
 	      form1.leadintime.value="2";
@@ -305,6 +339,7 @@
 	      form1.leadintime.value="0";
 	      form1.leadintime.setAttribute("disabled", "disabled");
 	  }
+	  */
       }
       
       function addObject(text)
@@ -325,7 +360,7 @@
       
       <p><center><font size=+3>iFit Tone Generator</font></center></p>
       <p><center>By: <a target=_blank href="http://mkpelleg.freeshell.org">Michael K. Pellegrino</a></center></p>
-      <p><center>Version 1.02 - 2022 01 23</center></p>
+      <p><center>Version 1.03 - 2022 01 24</center></p>
       <p>This program will help you create an iFit workout audio track to coincide with a music playlist.</p>
       <p>The program uses <a target=_blank href="http://kmp1.github.io/wav.js/">wav.js</a> by Kevin Phillips.</p>
       <p><b>Directions</b>:</p>
@@ -337,21 +372,20 @@
 	<li>Then burn it to a CD.</li>
       </ol>
 
+      <p id="pleasewait"><font color="#FF0000"><b>CREATING WAVE FILE SAMPLE BY SAMPLE...</b><br>(please wait)</font></p>
       <center>
 	    
-      <form name='form1' action='' method='GET'>
-	<p>Filename: <input type='fn' id='fn' name='fn' size=10><input type='button' onclick='javascript:saveByteArray();' value='Download WAV file'></p>
-	<p>Start Signals <input type='text' id='startatmin' name='startarmin' value='0' size='3'>m:<input type='text' id='startatsec' name='startarsec' value='0' size='3'> into playlist</p>
-	<p>Include Lead-in: <input type="checkbox" id="leadin" name="leadin" value="yes" checked onChange="javascript:check();"></p>
-	<p id="leadintimepara">Lead-in Time: <input type="text" id="leadintime" name="leadintime" value="2" size=5> seconds</p>
+	<form name='form1' action='' method='GET'>
+	<p>Filename: <input type='fn' id='fn' name='fn' value='no_name.wav' size=10><input type='button' onclick='javascript:saveByteArray();' value='Download WAV file'></p>
+	<p>Start Signals at time: min:<input type='text' id='startatmin' name='startarmin' value='0' size='3'>&nbsp;&nbsp;&nbsp;sec:<input type='text' id='startatsec' name='startarsec' value='0' size='3'>&nbsp;&nbsp;&nbsp;<input type='button' onclick='javascript:resetAll();' value='Reset All'></p>
 	
-	<p>m:<input type='text' id='textMinutes' name='textMinutes' size=2>&nbsp;s:<input type='text' id='textSeconds' name='textSeconds' size=2> &nbsp;resistance:<input type='text' id='textResist' name='textResist' size=5><input type='button' onclick='javascript:addToWorkout();' value='Add to Workout'></p>
+	
+	<p>min:<input type='text' id='textMinutes' name='textMinutes' size=2 value='0'>&nbsp;&nbsp;&nbsp;sec:<input type='text' id='textSeconds' name='textSeconds' size=2 value='0'> &nbsp;resistance:<input type='text' id='textResist' name='textResist' value='60' size=5><input type='button' onclick='javascript:addToWorkout();' value='Add to Workout'></p>
 	<p><textarea cols=80 rows=20 name='text_area'></textarea></p>
+	<p id="svg0"></p>
 	<p id="errorlog"></p>
       </form>
-      <p id="svg0"></p>
 
-
-</center>
+      </center>
 </html>
 
