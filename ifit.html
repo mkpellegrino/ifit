@@ -1,7 +1,7 @@
 <html>
   <!--    i-Fit Tone Generator    -->
   <!--  By Michael K. Pellegrino  -->
-  <!--      January 24, 2022      -->
+  <!--      January 25, 2022      -->
   
   <head>
     <title>iFit Tone Generator - Michael K. Pellegrino</title>
@@ -42,11 +42,7 @@
       
       function encode( x, y )
       {
-	  /* ******* */
-	  /* add a line to the svg */
 	  ht=(110-Number(y));
-	  //addObject("<line  x1='" + pointer/scale + "' y1='110' x2='" + pointer/scale + "' y2='" + ht + "' stroke-width='2' stroke='#000000'/>");
-	  //logMsg( "&lt;line  x1='" + pointer/scale + "' y1='110' x2='" + pointer/scale + "' y2='" + ht +  "' stroke-width='2' stroke='#000000'/&gt;");
 	  return ( encodeDigit(x) + encodeDigit(y) + encodeDigit(x+y) );
       }
 
@@ -64,32 +60,11 @@
 	      {
 		  silence88();
 	      }
-
 	      /* not sure why */
-	      silenceSamples(3);
-
+	      /* silenceSamples(3); */
 	  }
-	  /* approx 405*88 */
-	  /* this is the space between tones in the sample file */
-	  /*silenceSamples( 35646 );*/
       }
 
-      function intro_beeps()
-      {
-	  /* silence( Number( form1.leadin.value ) );
-	  createTones( 20, 20 );
-	  silence( 3 );
-	  for( var i=0; i<2; i++ )
-	  {
-	      createTones( 10, 10 );
-	      silenceSamples( 26460 );
-	      createTones( 20, 20 );
-	      silenceSamples( 26460 );
-	  }
-
-	  pointer=0; */
-
-      }
 
       function chirp()
       {
@@ -104,7 +79,7 @@
 	      }
 	  }
 	  var x2=pointer/scale;
-	  addObject("<line  x1='" + x1 + "' y1='" + ht + "' x2='" + x2 + "' y2='" + ht + "' stroke-width='2' stroke='#000000'/>");
+	  addObject("<line  x1='" + x1 + "' y1='" + ht + "' x2='" + x2 + "' y2='" + ht + "' stroke-width='3' stroke='#000000'/>");
       }
 
       function silence88()
@@ -117,7 +92,7 @@
 
 	  }
 	  var x2=pointer/scale;
-	  addObject("<line  x1='" + x1 + "' y1='" + ht + "' x2='" + x2 + "' y2='" + ht + "' stroke-width='2' stroke='#000000'/>");
+	  addObject("<line  x1='" + x1 + "' y1='" + ht + "' x2='" + x2 + "' y2='" + ht + "' stroke-width='3' stroke='#000000'/>");
 
       }
       
@@ -130,7 +105,7 @@
 	      wave.addSampleToAllChannels(127);
 	  }
 	  var x2=pointer/scale;
-	  addObject("<line  x1='" + x1 + "' y1='" + ht + "' x2='" + x2 + "' y2='" + ht + "' stroke-width='2' stroke='#000000'/>");
+	  addObject("<line  x1='" + x1 + "' y1='" + ht + "' x2='" + x2 + "' y2='" + ht + "' stroke-width='3' stroke='#000000'/>");
       }
       function silence( t )
       {
@@ -143,14 +118,14 @@
 	      wave.addSampleToAllChannels(127);
 	  }
 	  var x2=pointer/scale;
-	  addObject("<line  x1='" + x1 + "' y1='" + ht + "' x2='" + x2 + "' y2='" + ht + "' stroke-width='2' stroke='#000000'/>");
+	  addObject("<line  x1='" + x1 + "' y1='" + ht + "' x2='" + x2 + "' y2='" + ht + "' stroke-width='3' stroke='#000000'/>");
 	  
       }
 
       function resetAll()
       {
 
-	  document.getElementById("pleasewait").style.visibility = "hidden";
+	  document.getElementById("textSpeed").disabled = true;
 	  pointer=0;
 	  ht=0;
 	  form1.text_area.value="";
@@ -162,6 +137,9 @@
 	  form1.textSeconds.value="0";
 	  svg_array[0]=" ";
 	  document.getElementById("errorlog").innerHTML = "";
+	  document.getElementById("instructions").style.display = "none";
+	  document.getElementById("offset").style.display = "none";
+	  
       }
       function onload()
       {
@@ -189,9 +167,6 @@
 
       function saveByteArray()
       {
-	  /* ***** */
-	  document.getElementById("pleasewait").style.visibility = "visible";
-	  //alert();
 	  wave = wav.create(2, 44100, wav.SampleSize.EIGHT);
 	  pointer=0;
 	  processTextArea();
@@ -215,7 +190,6 @@
 	  form1.fn.value = fileName;
 	  link.download = fileName;
 	  link.click();
-	  document.getElementById("pleasewait").style.visibility = "hidden";
 
       }
 
@@ -230,21 +204,9 @@
       }
       function processTextArea()
       {
-	  //form1.startatmin.setAttribute("disabled", "disabled");
-	  //form1.startatsec.setAttribute("disabled", "disabled");
 	  startattime=Number(form1.startatmin.value*60*44100) + Number(form1.startatsec.value*44100);
 	  pointer=startattime;
 	  
-	 /* if( form1.leadin.value == "yes" )
-	  {
-	      if( form1.leadintime.value == "" )
-	      {
-		  logMsg( "[WARNING] Zero Leadin Time" );
-		  lit = 0;
-	      }
-	      
-	      intro_beeps();
-	  } */
 	  var txt = form1.text_area.value;
 	  var line = txt.split("\n");
 	  for( var i=0; i<line.length; i++ )
@@ -256,11 +218,13 @@
 	      else
 	      {
 		  var parameter = line[i].split(" ");
+		  if( document.getElementById("ellip_chbx").checked ) parameter[2]=parameter[1];
+
 		  if( pointer <= Number(parameter[0]))
 		  {
 		      silenceSamples( Number(parameter[0] - pointer) );
-		      logMsg( "[CREATE] " + parameter[0] + ":" + parameter[1] + " sample #: " + pointer, 3 );
-		      createTones( Number(parameter[1]), Number(parameter[1]) );
+		      logMsg( "[CREATE] " + parameter[0] + ":" + parameter[1] + " " + parameter[2] + " sample #: " + pointer, 3 );
+		      createTones( Number(parameter[1]), Number(parameter[2]));
 		  }
 		  else
 		  {
@@ -311,37 +275,22 @@
       function addToWorkout()
       {
 	  var location = Number(form1.textMinutes.value*60*44100) + Number(form1.textSeconds.value*44100);
-	  /* ***** */
-	  /* grey out (lock) the start at time options */
-	  /* form1.startatsec.setAttribute("disabled", "disabled"); */
 	  startattime=Number(form1.startatmin.value*60*44100) + Number(form1.startatsec.value*44100);
 
 	  var resistance = Math.floor(Number(form1.textResist.value));
 	  resistance=Math.floor(resistance/10);
 	  resistance*=10;
 	  if( resistance == 0 ) resistance = 10;
-	  form1.text_area.value += "" + location + " " + resistance + "\n";
+
+	  var speed = Math.floor(Number(form1.textSpeed.value));
+	  speed=Math.floor(speed/10);
+	  speed*=10;
+	  if( speed == 0 ) speed = 10;
+
+	  form1.text_area.value += "" + location + " " + resistance + " " + speed + "\n";
 	  sortTextArea();
       }
 
-
-
-      function check()
-      {
-	  /*
-	  if(form1.leadin.checked == true)
-	  {
-	      form1.leadintime.value="2";
-	      form1.leadintime.removeAttribute("disabled");
-	  }
-	  else
-	  {
-	      form1.leadintime.value="0";
-	      form1.leadintime.setAttribute("disabled", "disabled");
-	  }
-	  */
-      }
-      
       function addObject(text)
       {
 	  svg_array[svg_array.length-1]=text;
@@ -354,33 +303,74 @@
 	  document.getElementById("svg0").innerHTML=svg_text;
       }
 
+      function toggle_ellip_chbx()
+      {
+	  
+	  if( document.getElementById("ellip_chbx").checked )
+	  {
+	      document.getElementById("textSpeed").disabled = true;
+	  }
+	  else
+	  {
+	      document.getElementById("textSpeed").disabled = false;
+	  }
+      }
+      function toggleInstructions()
+      {
+	  if (document.getElementById("instructions").style.display == "block")
+	  {
+	      document.getElementById("instructions").style.display = "none";
+	  }
+	  else
+	  {
+	      document.getElementById("instructions").style.display = "block";
+	  }
+
+      }
+
+      function toggle( text )
+      {
+	  if (document.getElementById(text).style.display == "block")
+	  {
+	      document.getElementById(text).style.display = "none";
+	  }
+	  else
+	  {
+	      document.getElementById(text).style.display = "block";
+	  }
+
+      }
+     
     </script>
   </head>
   <body onload="onload();">
       
+    <form name='form1' action='' method='GET'>
       <p><center><font size=+3>iFit Tone Generator</font></center></p>
       <p><center>By: <a target=_blank href="http://mkpelleg.freeshell.org">Michael K. Pellegrino</a></center></p>
-      <p><center>Version 1.03 - 2022 01 24</center></p>
+      <p><center>Version 1.04 - 2022 01 25</center></p>
       <p>This program will help you create an iFit workout audio track to coincide with a music playlist.</p>
       <p>The program uses <a target=_blank href="http://kmp1.github.io/wav.js/">wav.js</a> by Kevin Phillips.</p>
-      <p><b>Directions</b>:</p>
-      <ol>
-	<li>Enter a time (minutes and seconds) and a resistance (10 - 100 in increments of 10) for your workout soundtrack.</li>
+      <p><input type='button' onclick='javascript:toggleInstructions();' value='Hide/Show Instructions'></p>
+      
+      <ol id="instructions">
+	<li>Enter a time (minutes and seconds), resistance/incline, and speed if needed (10 - 100 in increments of 10) for your workout.<p>Ellipticals don't use the &#34;Speed&#34; signal, so if you're using one, you can check the &#34;Elliptical&#34; checkbox.  The speed value won't be even looked at.<p></li>
 	<li>Click &#34;Add to Workout&#34;</li>
 	<li>Enter a filename for your <i>wav</i> file.</li>
+	<li>Enter an <i>offset</i> time to start controlling the iFit <input type='button' onclick='javascript:toggle("offset");' value='More/Less Info'></li>
+	<p id="offset">When I use the elliptical, I start the music first.  Then, on a specific cue from the music (like a cymbal crash, or when a certain note plays), I start the iFit signal sequence.  That way I know it'll be synchronized the way that I want it to be.  For the <i>offset</i> you would enter in the time at which that cue happens in the music.  For instance, I usually work out to the Dark Side of the Moon.  In my playlist, the first guitar strum is at 1 minute, sixteen seconds into the playlist, that's when I start the signals... so <i>that's</i> my offset... 1min 16sec</p>
 	<li>Click &#34;Download WAV file&#34; to get the audio file.</li>
 	<li>Then burn it to a CD.</li>
       </ol>
-
-      <p id="pleasewait"><font color="#FF0000"><b>CREATING WAVE FILE SAMPLE BY SAMPLE...</b><br>(please wait)</font></p>
+      </p>
       <center>
 	    
-	<form name='form1' action='' method='GET'>
 	<p>Filename: <input type='fn' id='fn' name='fn' value='no_name.wav' size=10><input type='button' onclick='javascript:saveByteArray();' value='Download WAV file'></p>
-	<p>Start Signals at time: min:<input type='text' id='startatmin' name='startarmin' value='0' size='3'>&nbsp;&nbsp;&nbsp;sec:<input type='text' id='startatsec' name='startarsec' value='0' size='3'>&nbsp;&nbsp;&nbsp;<input type='button' onclick='javascript:resetAll();' value='Reset All'></p>
+	<p>Start Signals at Offset time: min:<input type='text' id='startatmin' name='startarmin' value='0' size='3'>&nbsp;&nbsp;&nbsp;sec:<input type='text' id='startatsec' name='startarsec' value='0' size='3'>&nbsp;&nbsp;&nbsp;<input type='button' onclick='javascript:resetAll();' value='Reset All'></p>
 	
 	
-	<p>min:<input type='text' id='textMinutes' name='textMinutes' size=2 value='0'>&nbsp;&nbsp;&nbsp;sec:<input type='text' id='textSeconds' name='textSeconds' size=2 value='0'> &nbsp;resistance:<input type='text' id='textResist' name='textResist' value='60' size=5><input type='button' onclick='javascript:addToWorkout();' value='Add to Workout'></p>
+	<p>min:<input type='text' id='textMinutes' name='textMinutes' size=2 value='0'>&nbsp;&nbsp;&nbsp;sec:<input type='text' id='textSeconds' name='textSeconds' size=2 value='0'>&nbsp;resistance:<input type='text' id='textResist' name='textResist' value='60' size=5>&nbsp;speed:<input type='text' id='textSpeed' name='textSpeed' value='60' size=5><input type='button' onclick='javascript:addToWorkout();' value='Add to Workout'><input type="checkbox" id="ellip_chbx" name="ellip_chbx" checked onChange="javascript:toggle_ellip_chbx();">
+  <label for="ellip_chbx">Elliptical?</label></p>
 	<p><textarea cols=80 rows=20 name='text_area'></textarea></p>
 	<p id="svg0"></p>
 	<p id="errorlog"></p>
