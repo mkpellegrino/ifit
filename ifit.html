@@ -283,11 +283,15 @@
 	  if( resistance == 0 ) resistance = 10;
 
 	  var speed = Math.floor(Number(form1.textSpeed.value));
-	  speed=Math.floor(speed/10);
-	  speed*=10;
-	  if( speed == 0 ) speed = 10;
+	  // DON'T round the pace to the nearest multiple of 10
+	  //speed=Math.floor(speed/10);
+	  //speed*=10;
+	  
+	  if( speed > 100 ) speed= 100;
+	  if( speed < 10 ) speed = 10;
 
-	  form1.text_area.value += "" + location + " " + resistance + " " + speed + "\n";
+	  form1.text_area.value += "" + location + " " + speed + " " + resistance + "\n";
+	  
 	  sortTextArea();
       }
 
@@ -348,17 +352,17 @@
     <form name='form1' action='' method='GET'>
       <p><center><font size=+3>iFit Tone Generator</font></center></p>
       <p><center>By: <a target=_blank href="http://mkpelleg.freeshell.org">Michael K. Pellegrino</a></center></p>
-      <p><center>Version 1.04 - 2022 01 25</center></p>
+      <p><center>Version 1.05 - 2022 01 31</center></p>
       <p>This program will help you create an iFit workout audio track to coincide with a music playlist.</p>
       <p>The program uses <a target=_blank href="http://kmp1.github.io/wav.js/">wav.js</a> by Kevin Phillips.</p>
       <p><input type='button' onclick='javascript:toggleInstructions();' value='Hide/Show Instructions'></p>
       
       <ol id="instructions">
-	<li>Enter a time (minutes and seconds), resistance/incline, and speed if needed (10 - 100 in increments of 10) for your workout.<p>Ellipticals don't use the &#34;Speed&#34; signal, so if you're using one, you can check the &#34;Elliptical&#34; checkbox.  The speed value won't be even looked at.<p></li>
+	<li>Enter a time (minutes and seconds), resistance/incline (10 - 100 in increments of 10) and pace (10 - 100) for your workout.<p></li>
 	<li>Click &#34;Add to Workout&#34;</li>
 	<li>Enter a filename for your <i>wav</i> file.</li>
 	<li>Enter an <i>offset</i> time to start controlling the iFit <input type='button' onclick='javascript:toggle("offset");' value='More/Less Info'></li>
-	<p id="offset">When I use the elliptical, I start the music first.  Then, on a specific cue from the music (like a cymbal crash, or when a certain note plays), I start the iFit signal sequence.  That way I know it'll be synchronized the way that I want it to be.  For the <i>offset</i> you would enter in the time at which that cue happens in the music.  For instance, I usually work out to the Dark Side of the Moon.  In my playlist, the first guitar strum is at 1 minute, sixteen seconds into the playlist, that's when I start the signals... so <i>that's</i> my offset... 1min 16sec</p>
+	<p id="offset">When I use the elliptical, I start the music first.  Then, on a specific cue from the music (like a cymbal crash, or when a certain note plays), I start the iFit signal sequence.  That way I know it'll be synchronized the way that I want it to be.  For the <i>offset</i> you would enter in the time at which that cue happens in the music.  For instance, I usually work out to the Dark Side of the Moon.  In my playlist, the first guitar strum is at one minute and sixteen seconds into the playlist, that's when I start the signals... so <i>that's</i> my offset... 1min 16sec</p>
 	<li>Click &#34;Download WAV file&#34; to get the audio file.</li>
 	<li>Then burn it to a CD.</li>
       </ol>
@@ -369,8 +373,8 @@
 	<p>Start Signals at Offset time: min:<input type='text' id='startatmin' name='startarmin' value='0' size='3'>&nbsp;&nbsp;&nbsp;sec:<input type='text' id='startatsec' name='startarsec' value='0' size='3'>&nbsp;&nbsp;&nbsp;<input type='button' onclick='javascript:resetAll();' value='Reset All'></p>
 	
 	
-	<p>min:<input type='text' id='textMinutes' name='textMinutes' size=2 value='0'>&nbsp;&nbsp;&nbsp;sec:<input type='text' id='textSeconds' name='textSeconds' size=2 value='0'>&nbsp;resistance:<input type='text' id='textResist' name='textResist' value='60' size=5>&nbsp;speed:<input type='text' id='textSpeed' name='textSpeed' value='60' size=5><input type='button' onclick='javascript:addToWorkout();' value='Add to Workout'><input type="checkbox" id="ellip_chbx" name="ellip_chbx" checked onChange="javascript:toggle_ellip_chbx();">
-  <label for="ellip_chbx">Elliptical?</label></p>
+	<p>min:<input type='text' id='textMinutes' name='textMinutes' size=2 value='0'>&nbsp;&nbsp;&nbsp;sec:<input type='text' id='textSeconds' name='textSeconds' size=2 value='0'>&nbsp;resistance:<input type='text' id='textResist' name='textResist' value='60' size=5>&nbsp;&nbsp;pace:<input type='text' id='textSpeed' name='textSpeed' value='25' size=5><input type='button' onclick='javascript:addToWorkout();' value='Add to Workout'><input type="checkbox" id="ellip_chbx" name="ellip_chbx" checked onChange="javascript:toggle_ellip_chbx();">
+  <label for="ellip_chbx">Lock Pace</label></p>
 	<p><textarea cols=80 rows=20 name='text_area'></textarea></p>
 	<p id="svg0"></p>
 	<p id="errorlog"></p>
