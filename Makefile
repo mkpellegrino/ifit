@@ -31,7 +31,11 @@ ai	: csafe-ai.c Makefile
 	$(value CC) csafe-ai.c $(CFLAGS) $(INCLUDE) $(LDFLAGS) -o $(BIN_DIR)csafe-ai
 	@echo "Done."
 
-all	: clean release debug
+decode	: decode.c
+	$(CC) decode.c $(CFLAGS) $(INCLUDE) $(LDFLAGS) -o $(BIN_DIR)decode
+	@echo "Done."
+
+all	: clean release ai debug
 
 verbose: all
 	@echo ""

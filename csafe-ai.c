@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <termios.h>
 
-#define SERIAL_PORT "/dev/ttyUSB0"  // Adjust this based on your system
+#define SERIAL_PORT "/dev/tty.usbserial-A9XNR88X"  // Black Cable
 
 int main() {
     int serialPort;
@@ -41,6 +41,7 @@ int main() {
 
     // Read response from the serial port
     char response[255];
+    usleep(500000);
     int bytesRead = read(serialPort, response, sizeof(response));
     if (bytesRead == -1) {
         perror("Error reading from serial port");
